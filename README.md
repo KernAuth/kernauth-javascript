@@ -1,6 +1,6 @@
 # KernAuth JavaScript example
 
-Paste the public app ID, key ID, and public key from Developers into `javascript.mjs`. Node.js 20 or newer.
+Paste the public app ID and public key from Developers into `javascript.mjs`. Node.js 20 or newer.
 
 ## Instance
 
@@ -8,7 +8,6 @@ Paste the public app ID, key ID, and public key from Developers into `javascript
 const app = new KernAuth(
   "https://api.kernauth.com",
   "__PUBLIC_APP_ID__",
-  "__KEY_ID__",
   "__PUBLIC_KEY__",
 );
 ```
