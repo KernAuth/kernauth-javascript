@@ -1,28 +1,14 @@
 import assert from "node:assert/strict";
-import { readFileSync } from "node:fs";
 import { test } from "node:test";
-import { URL } from "node:url";
-import { canonical, verifyGrant } from "./javascript.mjs";
+import { apiMessage, checkBody } from "./kernauth.mjs";
 
-const fixture = JSON.parse(readFileSync(new URL("./vectors.json", import.meta.url)));
-for (const vector of fixture.vectors) {
-  test(`JavaScript verifies ${vector.name}`, () => {
-    const grant = { entitlement: vector.fields, signature: vector.signature };
-    const now = Date.parse("2026-01-01T00:01:00Z");
-    assert.equal(canonical(vector.fields).toString("utf8"), vector.canonical);
-    assert.equal(verifyGrant(grant, vector.fields.nonce, vector.fields.application_id,
-      vector.public_key, now), true);
-    assert.equal(verifyGrant(grant, "wrong", vector.fields.application_id,
-      vector.public_key, now), false);
-    assert.equal(verifyGrant(grant, vector.fields.nonce, "pub_other_app",
-      vector.public_key, now), false);
-    assert.equal(verifyGrant({ ...grant, signature: `${vector.signature}AA` }, vector.fields.nonce,
-      vector.fields.application_id, vector.public_key, now), false);
-    assert.equal(verifyGrant(grant, vector.fields.nonce, vector.fields.application_id,
-      vector.public_key, Date.parse(vector.fields.expires_at)), false);
-    assert.equal(verifyGrant({ ...grant, entitlement: { ...vector.fields, device_id: "other" } },
-      vector.fields.nonce, vector.fields.application_id, vector.public_key, now), false);
-    assert.equal(verifyGrant({ ...grant, entitlement: { ...vector.fields, status: "revoked" } },
-      vector.fields.nonce, vector.fields.application_id, vector.public_key, now), false);
+test("JavaScript check body", () => {
+  assert.deepEqual(checkBody("pub_harbor_desktop", "KERN-ABCD-EFGH-IJKL-MNOP"), {
+    protocol_version: 1,
+    public_app_id: "pub_harbor_desktop",
+    client_version: "1.0.0",
+    license_key: "KERN-ABCD-EFGH-IJKL-MNOP",
   });
-}
+  assert.equal(apiMessage({ error: { message: "Update required" } }, "no"), "Update required");
+  assert.equal(apiMessage({}, "no"), "no");
+});
